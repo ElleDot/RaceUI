@@ -1,0 +1,11 @@
+Basic Car Steering
+RT	Accelerate	3	SLIDER	rz	0	1.0	0.0
+LT	Brake	3	SLIDER	z	0	1.0	0.0
+L Stick	Steering	3	SLIDER	x	0	1.0	0.0
+Start	Pause	1	BUTTON	8	0	0.0	0.0
+Select	Reset	1	BUTTON	9	0	0.0	0.0
+dUp	D-Pad Up	1	BUTTON	11	0	0.0	0.0
+dDown	D-Pad Down	1	BUTTON	12	0	0.0	0.0
+dLeft	D-Pad Left	1	BUTTON	13	0	0.0	0.0
+dRight	D-Pad Right	1	BUTTON	14	0	0.0	0.0
+Y	Y Button	1	BUTTON	3	0	0.0	0.0
