@@ -12,7 +12,6 @@ ControlDevice stick;
 Sprite playerSprite, needleSprite;
 StopWatch timer;
 int alphaVal = 255;
-
 int lightCounter = 0;
 int menuCooldown = 60;
 
@@ -62,7 +61,6 @@ float playTime = 0, lastLapTime = 0, bestLapTime = 0;
 public void setup() {
   
   size(1280, 720);
-  
   lightLayer = createGraphics(width,height);
   
   // Initialise the ControlIO then the controller
@@ -98,13 +96,12 @@ public void loadMap() {
   }
 
   bestLapTime = float(lines[((trackSelected-1)*5) + carSelected - 1]);
-  
-  println("Best time on " + getTrackName(trackSelected) + " in the " + getCarName(carSelected)+ " (" + trackSelected + 
-    "-" + carSelected + ") is " + bestLapTime);
-  
   lastLapTime = 0;
   playTime = 0;
   gameState = 1;
+  
+  println("Best time on " + getTrackName(trackSelected) + " in the " + getCarName(carSelected)+ " (" + trackSelected + 
+    "-" + carSelected + ") is " + bestLapTime);
   
   // Create the lap timer if one doesn't exist
   // The old one is re-used if one is already present!
@@ -121,6 +118,7 @@ public void loadMap() {
   ArrayList<Sprite> tyres = new ArrayList<Sprite>(); 
   Sprite s;
   
+  // generate playable map from the base track image
   for (int y = 10; y < width; y += textureSize) {
     for (int x = 10; x < width; x += textureSize) {
       int c = map.get(x, y) & 0x00ffffff;
@@ -128,98 +126,107 @@ public void loadMap() {
       int g = (c >> 8) & 0xff;
       int b = c & 0xff;
       
-      if (r == 255 && g == 0 && b == 0) {
-        // Asphalt, no collision
+      if (r == 255 && g == 0 && b == 0) { // Asphalt, no collision
         s = new Sprite(this, "Textures/asphalt.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 0 && g == 255 && b == 0) {
-        // Finish line AND start point
+      } else if (r == 0 && g == 255 && b == 0) { // Finish line AND start point
         s = new Sprite(this, "Textures/chequered.png", 50);
         s.setXY(x, y);
         chequered.add(s);
         playerStartX = x;
         playerStartY = y;
-      } else if (r == 255 && g == 255 && b == 0) {
-        // Finish line, no collision
+      } else if (r == 255 && g == 255 && b == 0) { // Finish line, no collision
         s = new Sprite(this, "Textures/chequered.png", 50);
         s.setXY(x, y);
         chequered.add(s);
-      } else if (r == 255 && g == 0 && b == 255) {
-        // Edge of road, normal
+      } else if (r == 255 && g == 0 && b == 255) { // Edge of road, normal
         s = new Sprite(this, "Textures/lightAsphalt.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 0 && g == 192 && b == 0) {
-        // CHECKPOINT - ROAD TEXTURE
+      } else if (r == 0 && g == 192 && b == 0) { // CHECKPOINT - ROAD TEXTURE
         s = new Sprite(this, "Textures/asphalt.png", 50);
         s.setXY(x, y);
         checkpoints.add(s);
-      } else if (r == 0 && g == 128 && b == 0) {
-        // CHECKPOINT - ROAD EDGE
+      } else if (r == 0 && g == 128 && b == 0) { // CHECKPOINT - ROAD EDGE
         s = new Sprite(this, "Textures/lightAsphalt.png", 50);
         s.setXY(x, y);
         checkpoints.add(s);
-      } else if (r == 192 && g == 0 && b == 192) {
-        // Kerb NS
+      } else if (r == 192 && g == 0 && b == 192) { // Kerb NS
         s = new Sprite(this, "Textures/kerbNS.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 128 && g == 0 && b == 128) {
-        // Kerb EW
+      } else if (r == 128 && g == 0 && b == 128) { // Kerb EW
         s = new Sprite(this, "Textures/kerbEW.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 0 && g == 0 && b == 255) {
-        // walls with stopping collision
+      } else if (r == 0 && g == 0 && b == 255) { // walls with stopping collision
         s = new Sprite(this, "Textures/concrete.png", 50);
         s.setXY(x, y);
         walls.add(s);
-      } else if (r == 0 && g == 255 && b == 255) {
-        // Tyre walls, bouncy collision 
+      } else if (r == 0 && g == 255 && b == 255) { // Tyre walls NS, bouncy collision 
         s = new Sprite(this, "Textures/tyreWallNS.png", 50);
         s.setXY(x, y);
         tyres.add(s);
-      } else if (r == 0 && g == 128 && b == 128) {
-        // Tyre walls, bouncy collision 
+      } else if (r == 0 && g == 128 && b == 128) { // Tyre walls EW, bouncy collision 
         s = new Sprite(this, "Textures/tyreWallEW.png", 50);
         s.setXY(x, y);
         tyres.add(s);
-      } else if (r == 32 && g == 32 && b == 32) {
-        // North-facing start grid
-        s = new Sprite(this, "Textures/gridN.png", 50);
-        s.setXY(x, y);
-        roads.add(s);
-      } else if (r == 64 && g == 64 && b == 64) {
-        // East-facing start grid
+      } else if (r == 64 && g == 64 && b == 64) { // East-facing start grid
         s = new Sprite(this, "Textures/gridE.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 96 && g == 96 && b == 96) {
-        // South-facing start grid
+      } else if (r == 96 && g == 96 && b == 96) { // South-facing start grid
         s = new Sprite(this, "Textures/gridSW.png", 50);
         s.setXY(x, y);
         roads.add(s);
-      } else if (r == 128 && g == 128 && b == 128) {
-        // West-facing start grid
+      } else if (r == 128 && g == 128 && b == 128) { // West-facing start grid
         s = new Sprite(this, "Textures/gridW.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 255 && g == 128 && b == 0) { // Crowd Stand
+        s = new Sprite(this, "Textures/standNM.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 255 && g == 64 && b == 0) { // Front Crowd Stand
+        s = new Sprite(this, "Textures/standFM.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 255 && g == 96 && b == 0) { // Crowd Stand L
+        s = new Sprite(this, "Textures/standNL.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 255 && g == 32 && b == 0) { // Crowd Stand R
+        s = new Sprite(this, "Textures/standNR.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 0 && g == 64 && b == 0) { // tree Texture
+        s = new Sprite(this, "Textures/tree.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else if (r == 0 && g == 32 && b == 0) { // grass alt texture
+        s = new Sprite(this, "Textures/grass2.png", 50);
+        s.setXY(x, y);
+        roads.add(s);
+      } else { // grass tile texture, in case map colour is not recognised or is left blank
+        s = new Sprite(this, "Textures/grass.png", 50);
         s.setXY(x, y);
         roads.add(s);
       }
     }
   }
   
-  // Convert arraylists to arrays for faster processing later
+  // Convert arraylists to arrays for SPEEDY processing
   concrete = walls.toArray(new Sprite[walls.size()]);
   asphalt = roads.toArray(new Sprite[roads.size()]);
   finishLine = chequered.toArray(new Sprite[chequered.size()]);
   tyreWalls = tyres.toArray(new Sprite[tyres.size()]);
   checkPoints = checkpoints.toArray(new Sprite[checkpoints.size()]);
   
-  // Setup the car sprite
+  // Set the car sprite up
   String carFilePath = "Cars/" + carSelected + ".png";
   playerSprite = new Sprite(this, carFilePath, 100);
-  
+  // Set the dial needle sprite up 
   String needlePath = "UI/dialNeedle.png";
   needleSprite = new Sprite(this, needlePath, 100);
   needleSprite.setXY(width-64, 64);
@@ -230,7 +237,6 @@ public void loadMap() {
 }
 
 void drawLights(int lightCounter) {
-  
   lightImage = loadImage("UI/lights"+lightCounter+".png");
   lightLayer.beginDraw();
   lightLayer.imageMode(CENTER);
@@ -238,15 +244,13 @@ void drawLights(int lightCounter) {
   lightLayer.image(lightImage,width/2,height/2);
   lightLayer.endDraw();
   image(lightLayer,0,0);
-  
 }
 
 public void initGameStart() {
   
+  // Set position of car, speed of car, rotation, game state, etc.
   playTime = 0;
   lightCounter = 0;
-  
-  // Set position, speed, rotation
   playerSpeed = 0;
   playerDirection = radians(startingDirection[trackSelected]);
   playerSprite.setXY(playerStartX, playerStartY);
@@ -268,7 +272,7 @@ void drawMenu() {
   image(menuImage, 0, 0);
   textAlign(LEFT,CENTER);
   fill(255);
-  text("RaceUI v1.0.1 - 09/11/20",10,10);
+  text("RaceUI v1.1.1 - 14/11/20",10,10);
   text("ElleDot 2020",10,30);
   image(carPreviewImage,width*0.03,height*0.5);
   image(trackPreviewImage,width*0.03,height*0.7);
@@ -306,7 +310,6 @@ void drawMenu() {
 }
 
 String getTrackName(int trackNumber) {
-  
   switch (trackNumber) {
     case 1:
       trackName = "Brands Hatch Indy Circuit";
@@ -325,22 +328,33 @@ String getTrackName(int trackNumber) {
 }
 
 String getCarName(int carNumber) {
-  
   switch (carNumber) {
     case 1:
       carName = "le Deux Cent Cinq";
       break;
     case 2:
-      carName = "the Retro Eight-6";
+      if (scoresShown) {
+        carName = "Retro Eight-6";
+      } else {
+        carName = "the Retro Eight-6";
+      }
       break;
     case 3:
       carName = "Das Auto";
       break;
     case 4:
-      carName = "the TG-40";
+      if (scoresShown) {
+        carName = "TG-40";
+      } else {
+        carName = "the TG-40";
+      }
       break;
     case 5:
-      carName = "the Volta Mk.3";
+      if (scoresShown) {
+        carName = "Volta Mk.3";
+      } else {
+        carName = "the Volta Mk.3";
+      }
       break;
   }
   return carName;
@@ -349,19 +363,6 @@ String getCarName(int carNumber) {
 void drawRace() {
   
   surface.setTitle("RaceUI - Racing at " + getTrackName(trackSelected) + " in " + getCarName(carSelected) + " - " + int(frameRate));
-  
-  if (gameState != 1) {
-    processUserGameInput();
-    playTime = (float) timer.getRunTime();
-    float deltaTime = (float) timer.getElapsedTime();
-    updateAllSprites(deltaTime);
-    processCollisions(deltaTime);
-  } else {
-   
-    fill(0,128);
-    rect(0,0,width,height);
-    
-  }
   
   //Draw textures here
   for (Sprite s : concrete)
@@ -376,6 +377,19 @@ void drawRace() {
     s.draw();
     
   playerSprite.draw();
+  
+  if (gameState != 1) {
+    processUserGameInput();
+    playTime = (float) timer.getRunTime();
+    float deltaTime = (float) timer.getElapsedTime();
+    updateAllSprites(deltaTime);
+    processCollisions(deltaTime);
+  } else {
+    fill(0,128);
+    rect(0,0,width,height);
+  }
+    
+  
   showStatus((float) playTime, accelInput, brakeInput);
   
   if (lightCounter < 360) {
@@ -389,23 +403,13 @@ void drawRace() {
       timer.reset();
       gameState = 2;
     }
-    
     drawLights(lightImageCounter);
-    
   }    
 }
 
 public void draw() {
-  
-  // Start drawing now
-  background(0, 64, 0);
   if (menuCooldown > 0) menuCooldown--;
-  
-  if (gameState == 0) {
-    drawMenu();
-  } else {
-    drawRace();
-  }
+  if (gameState == 0) { drawMenu(); } else { drawRace(); }
 }
 
 void showStatus(float lapTime, float accelInput, float brakeInput) {
@@ -514,7 +518,6 @@ public void processCollisions(float deltaTime) {
       break;
     }
   }
-  
 }
 
 void lapCompleteCheck() {
@@ -526,7 +529,7 @@ void lapCompleteCheck() {
     if (lastLapTime < bestLapTime || bestLapTime == 0) { 
       
       // Player just drove a best lap!
-      bestLapTime = lastLapTime;
+      bestLapTime = playTime;
       String[] timesToWrite = new String[lines.length];
       
       for (int i = 0; i < lapRecords.size(); i++) {
@@ -538,14 +541,13 @@ void lapCompleteCheck() {
       }
       
       // Writes the new best time to the save file
-      saveStrings("times.txt", timesToWrite);
+      saveStrings("data/times.txt", timesToWrite);
       
     }
     // Flash white for a frame, showing lap completion.
     background(255);
     timer.reset();
   }
-  
 }
 
 // Forced sprite update
@@ -558,12 +560,12 @@ public void processUserMenuInput() {
   
   if (menuCooldown == 0) {
     
-    if (stick.getButton("dUp").pressed()) {
+    if (stick.getButton("dUp").pressed() && !scoresShown) {
       carSelected++;
       if (carSelected > 5) carSelected = 1;
       carPreviewImage = loadImage("UI/car"+carSelected+".png");
       menuCooldown = int(frameRate * 0.333);
-    } else if (stick.getButton("dDown").pressed()) {
+    } else if (stick.getButton("dDown").pressed() && !scoresShown) {
       carSelected--;
       if (carSelected < 1) carSelected = 5;
       carPreviewImage = loadImage("UI/car"+carSelected+".png");
@@ -594,17 +596,15 @@ public void processUserMenuInput() {
 // Handles Controller input during gameplay
 public void processUserGameInput() {
   
+  // If player is holding both triggers, braking takes priority
+  // The car will always try to move towards a target speed and the triggers just affect what the target is.
+  // Full braking is -50, max acceleration is whatever the car's top speed is, nothing pressed means 0 is the target
+  // If full lock turning, the target is 75% of the throttle input's target speed
   accelInput = stick.getSlider("RT").getValue();
   brakeInput= stick.getSlider("LT").getValue();
   boolean isAccelerating = accelInput > -1 ? true : false;
   boolean isBraking = brakeInput > -1 ? true : false;
   float turnInput = stick.getSlider("L Stick").getValue()*playerTurnRate[carSelected];
-  
-  // If player is holding both triggers, braking takes priority
-  
-  // The car will always try to move towards a target speed and the triggers just affect what the target is.
-  // Full braking is -50, max acceleration is whatever the car's top speed is.
-  // If full lock turning, the target is 75% of the max speed
   
   if (isBraking) { 
     // Player is braking
@@ -622,10 +622,8 @@ public void processUserGameInput() {
     if (playerSpeed > 0 && playerSpeed < 2) playerSpeed = 0;
   }
   
-  // 'Dead zones' for control sticks
-  // My controller doesn't centre properly, so I've had to set anything under 5% input to 0.
+  // 'Dead zones' - My controller doesn't centre properly, so I've had to set anything under 5% input to 0.
   if (turnInput < 0.05 && turnInput > -0.05) {turnInput = 0;}
-  
   float speedPenalty = (playerSpeed/playerMaxSpeed[carSelected]);
   
   // Slower turning if the player is accelerating
